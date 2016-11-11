@@ -31,6 +31,11 @@ class Parser {
     private $oFormattedMealData;
 
     /**
+     * @var object  contains the formatted meal data
+     */
+    private $oFormattedInfoData;
+
+    /**
      * @var integer contains the index for 'FormatSingleDay'
      */
     private $iIndex;
@@ -43,11 +48,14 @@ class Parser {
      * @param $sParseURL    string  the URL to parse from
      */
     public function __construct($sParseURL){
+        //echo "<pre>";
+
         $this->iIndex = 1;
         $this->iDayIndex = 0;
         $this->LoadDOMData($sParseURL);
         $this->FilterElements();
         $this->ParseMealData();
+        $this->ParseInfoData();
     }
 
     /**
@@ -55,10 +63,21 @@ class Parser {
      *
      * Return the formatted meal data
      *
-     * @return string   the formatted meal data in JSON
+     * @return string   the formatted meal data as JSON
      */
     public function LoadMealData(){
         return json_encode($this->oFormattedMealData);
+    }
+
+    /**
+     * LoadInfoData
+     *
+     * Return the formatted info data
+     *
+     * @return  string  the formatted info data as JSON
+     */
+    public function LoadInfoData(){
+        return json_encode($this->oFormattedInfoData);
     }
 
     /**
@@ -95,12 +114,45 @@ class Parser {
      */
     private function FilterElements(){
         $this->aMeals = explode("Gericht am ", trim(htmlentities($this->sRawDOMData)));
-        $this->aInfo = explode("* Die", $this->aMeals[10]);
+        $this->aInfo = explode("* Die", trim(htmlentities($this->aMeals[10])));
 
         $this->aMeals[10] = substr($this->aMeals[10], 0, strpos($this->aMeals[10], "* Die"));
 
         unset($this->aMeals[0]);
         unset($this->aInfo[0]);
+    }
+
+    /**
+     * ParseInfoData
+     *
+     * Parses all needed info data into an object
+     */
+    private function ParseInfoData(){
+        $aInfoArray = explode(" ", $this->aInfo[1]);
+        $iMarkerIndex = 0;
+        foreach($aInfoArray as $iKey => $sInfoString){
+            if($iKey >=21 && $iKey <= 31) continue;
+
+            if($iKey <= 20){
+                $this->oFormattedInfoData->priceInfo .= " " . $sInfoString;
+                continue;
+            }
+
+            if($iKey >= 32 && $iKey <= 127){
+                if(is_numeric($sInfoString)){
+                    $iMarkerIndex++;
+                    $this->oFormattedInfoData->marker[$iMarkerIndex]->id = $sInfoString;
+                    continue;
+                }
+
+                $this->oFormattedInfoData->marker[$iMarkerIndex]->description .= $sInfoString;
+                continue;
+            }
+
+            if($iKey >= 128){
+                $this->oFormattedInfoData->annotations .= " " . $sInfoString;
+            }
+        }
     }
 
     /**
