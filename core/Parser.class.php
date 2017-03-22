@@ -1,9 +1,18 @@
 <?php
-
 /**
- * Class Parser
+ * Created by PhpStorm.
+ * User: ruben
+ * Date: 22.03.2017
+ * Time: 01:25
  */
-class Parser {
+
+namespace api\core;
+
+use DOMDocument;
+use DOMXPath;
+
+class Parser
+{
 
     /**
      * @var string  contains the raw DOM
@@ -255,12 +264,12 @@ class Parser {
         $sDescription = "";
         foreach($aSingleMeal as $sMealValue){
             if(is_numeric($sMealValue)){
-                $this->oFormattedMealData->day[$this->iDayIndex]->meals[$iMealIndex]->marker[] = $sMealValue;
+                $this->oFormattedMealData->day[$this->iDayIndex]->meal[$iMealIndex]->marker[] = $sMealValue;
             }
 
             if(is_numeric(str_replace(',', '.', $sMealValue))){
                 if(strlen($sMealValue) > 2){
-                    $this->oFormattedMealData->day[$this->iDayIndex]->meals[$iMealIndex]->prices[] = $sMealValue;
+                    $this->oFormattedMealData->day[$this->iDayIndex]->meal[$iMealIndex]->prices[] = $sMealValue;
                 }
             }
 
@@ -272,8 +281,8 @@ class Parser {
                 }
             }
 
-            $this->oFormattedMealData->day[$this->iDayIndex]->meals[$iMealIndex]->date = $sDate;
-            $this->oFormattedMealData->day[$this->iDayIndex]->meals[$iMealIndex]->description = $sDescription;
+            $this->oFormattedMealData->day[$this->iDayIndex]->meal[$iMealIndex]->date = $sDate;
+            $this->oFormattedMealData->day[$this->iDayIndex]->meal[$iMealIndex]->description = $sDescription;
         }
     }
 }
